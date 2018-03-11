@@ -315,7 +315,7 @@ function rgbas(opacity) {
         'rgba(193, 253, 111,' + opacity + ')']
 }
 
-function getBarChartData(label, labels, data) {
+function getBarChartData(index, label, labels, data) {
     let l = [];
     for (let i = 0; i < labels.length; i++) {
         if (labels[i].length > maxGraphLabel) {
@@ -335,8 +335,8 @@ function getBarChartData(label, labels, data) {
             datasets: [{
                 label: label,
                 data: data,
-                backgroundColor: bgc,
-                borderColor: bc,
+                backgroundColor: bgc[index],
+                borderColor: bc[index],
                 borderWidth: 1
             }]
         },
@@ -399,7 +399,7 @@ function drawBarGraphs(index, exportData) {
 
         const [label, labels, data] = allData[i];
 
-        new Chart(ctx, getBarChartData(label, labels, data));
+        new Chart(ctx, getBarChartData(i, label, labels, data));
         document.getElementById(index.toString()).appendChild(canvas);
     }
 }
