@@ -110,17 +110,18 @@ function showDownloadOptions() {
     document.getElementById('output').innerHTML = "<br/><br/>Ready to export<br/>";
 
     for (let i = 1; i < iData.length; i++) {
-        let div = document.createElement("div");
-        div.setAttribute("id", i.toString());
+        let contentRow = document.createElement("div");
+        contentRow.setAttribute("id", i.toString());
+        contentRow.classList.add("contentRow");
         document.getElementById("output").appendChild(document.createElement("br"));
-        document.getElementById("output").appendChild(div);
+        document.getElementById("output").appendChild(contentRow);
         document.getElementById("output").appendChild(document.createElement("br"));
 
         let link = document.createElement("a");
         link.innerText = iData[i][nameColumnNumber];
         link.setAttribute("href", "#");
         link.setAttribute("onclick", "downloadFile(" + i + ")");
-        div.appendChild(link);
+        contentRow.appendChild(link);
     }
 }
 
@@ -385,8 +386,6 @@ function drawBarGraphs(index, exportData) {
         const [label, labels, data] = allData[i];
 
         new Chart(ctx, getBarChartData(label, labels, data));
-
-        canvas.style.cssText = "display:block;width:" + width + "px;height:" + height + "px;";
         document.getElementById(index.toString()).appendChild(canvas);
     }
 }
