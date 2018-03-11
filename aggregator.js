@@ -103,7 +103,7 @@ function scrubData(rows) {
     return rows;
 }
 
-function showDownloadOptions() {
+function showDownloadLinks() {
     console.log("Preparing links");
 
     // Reset the output div
@@ -297,6 +297,24 @@ function CSVParse(csvString, delimiter) {
     return rows;
 }
 
+function rgbas(opacity) {
+    if (!opacity)
+        opacity = 1;
+    return ['rgba(54, 162, 235,' + opacity + ')',
+        'rgba(75, 192, 192,' + opacity + ')',
+        'rgba(153, 102, 255,' + opacity + ')',
+        'rgba(2, 71, 181,' + opacity + ')',
+        'rgba(203, 53, 175,' + opacity + ')',
+        'rgba(226, 45, 44,' + opacity + ')',
+        'rgba(102, 181, 19,' + opacity + ')',
+        'rgba(92, 165, 221,' + opacity + ')',
+        'rgba(250, 40, 162,' + opacity + ')',
+        'rgba(250, 252, 120,' + opacity + ')',
+        'rgba(67, 59, 246,' + opacity + ')',
+        'rgba(172, 127, 203,' + opacity + ')',
+        'rgba(193, 253, 111,' + opacity + ')']
+}
+
 function getBarChartData(label, labels, data) {
     let l = [];
     for (let i = 0; i < labels.length; i++) {
@@ -306,6 +324,10 @@ function getBarChartData(label, labels, data) {
             l.push(labels[i]);
         }
     }
+
+    const bgc = rgbas(0.2);
+    const bc = rgbas(1);
+
     return {
         type: 'bar',
         data: {
@@ -313,16 +335,8 @@ function getBarChartData(label, labels, data) {
             datasets: [{
                 label: label,
                 data: data,
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
-                ],
+                backgroundColor: bgc,
+                borderColor: bc,
                 borderWidth: 1
             }]
         },
@@ -390,6 +404,162 @@ function drawBarGraphs(index, exportData) {
     }
 }
 
+function groupScoresByCategory(exportData) {
+    let keyAndData = [];
+
+    // build keys and get question positions
+    for (let i = 0; i < exportData[0].length; i++) {
+        // skip any non MCQ questions
+        if (exportData[0][i].indexOf(")") === -1)
+            continue;
+
+        let found = false;
+        const tempKey = exportData[0][i].split(" ")[0].toUpperCase();
+        for (let j = 0; j < keyAndData.length; j++) {
+            if (keyAndData[j].key === tempKey) {
+                keyAndData[j].data.pos.push(i);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            keyAndData.push({key: tempKey, data: {pos: [i]}});
+        }
+    }
+    const selfIndex = 1;
+    const teamIndex = 2;
+    for (let i = 0; i < keyAndData.length; i++) {
+        keyAndData[i].data.self = {
+            total: 0,
+            count: 0,
+            unanswered: 0,
+            avg: "0.00"
+        };
+        keyAndData[i].data.team = {
+            total: 0,
+            count: 0,
+            unanswered: 0,
+            avg: "0.00"
+        };
+        // for each MCQ
+        for (let j = 0; j < keyAndData[i].data.pos.length; j++) {
+            const pos = keyAndData[i].data.pos[j];
+            const selfVal = exportData[selfIndex][pos];
+            const teamVal = exportData[teamIndex][pos];
+            if (selfVal) {
+                keyAndData[i].data.self.total += selfVal;
+                keyAndData[i].data.self.count++;
+                keyAndData[i].data.self.avg = (keyAndData[i].data.self.total / keyAndData[i].data.self.count).toFixed(2);
+            } else {
+                keyAndData[i].data.self.unanswered++;
+            }
+            if (teamVal) {
+                keyAndData[i].data.team.total += teamVal;
+                keyAndData[i].data.team.count++;
+                keyAndData[i].data.team.avg = (keyAndData[i].data.team.total / keyAndData[i].data.team.count).toFixed(2);
+            } else {
+                keyAndData[i].data.team.unanswered++;
+            }
+        }
+    }
+
+    return keyAndData;
+}
+
+function drawScatterGraph(index, data) {
+    const oldCanvas = document.getElementById("scatter");
+    if (oldCanvas) {
+        oldCanvas.parentElement.removeChild(oldCanvas);
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.setAttribute("id", "scatter");
+    const ctx = canvas.getContext('2d');
+    const colors = rgbas();
+
+    let datasets = [];
+    for (let i = 0; i < data.length; i++) {
+        datasets.push({
+            label: data[i].key,
+            backgroundColor: colors[i],
+            borderColor: colors[i],
+            radius: [0, 0, 10],
+            pointHoverRadius: [0, 0, 10],
+            data: [{x: 0, y: 0},
+                {x: 5, y: 5},
+                {x: data[i].data.self.avg, y: data[i].data.team.avg, pointStyle: 'star'}]
+        })
+    }
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'SELF'
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'TEAM'
+                    }
+                }]
+            }
+        }
+    });
+
+    document.getElementById(index.toString()).appendChild(canvas);
+}
+
+// TODO: - create plot from provided datasets
+function drawRadarGraph(index, data) {
+    const canvas = document.createElement("canvas");
+    canvas.setAttribute("id", "scatter");
+    const ctx = canvas.getContext('2d');
+
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ["Leadership", "Mentoring", "Skills", "Onemore"],
+            datasets: [
+                {
+                    label: 'SELF',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    data: [1, 2, 4, 3]
+                },
+                {
+                    label: 'TEAM',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    data: [4, 3, 5, 6]
+                }
+            ]
+        },
+        options: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Self vs Team'
+            },
+            scale: {
+                ticks: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    document.getElementById('output').appendChild(canvas);
+}
+
 // Helper functions end ---->
 
 // functions called from the html ---->
@@ -410,7 +580,7 @@ const openFile = function (event, type) {
 
         if (tData && iData && mData) {
             tData = tData.concat(mData);
-            showDownloadOptions();
+            showDownloadLinks();
         }
     };
     reader.readAsText(input.files[0]);
@@ -419,6 +589,8 @@ const openFile = function (event, type) {
 const downloadFile = function (index) {
     console.log("Download file called with index: " + index);
     const exportData = aggregateData(index);
+    const scoresByCategory = groupScoresByCategory(exportData);
+    drawScatterGraph(index, scoresByCategory);
     drawBarGraphs(index, exportData);
     exportToCsv(iData[index][nameColumnNumber] + '.csv', exportData);
 };
