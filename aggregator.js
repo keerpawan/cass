@@ -516,38 +516,50 @@ function drawScatterGraph(index, data) {
     document.getElementById(index.toString()).appendChild(canvas);
 }
 
-// TODO: - create plot from provided datasets
 function drawRadarGraph(index, data) {
+    const oldCanvas = document.getElementById("radar");
+    if (oldCanvas) {
+        oldCanvas.parentElement.removeChild(oldCanvas);
+    }
+
     const canvas = document.createElement("canvas");
-    canvas.setAttribute("id", "scatter");
+    canvas.setAttribute("id", "radar");
     const ctx = canvas.getContext('2d');
+
+    const bgc = rgbas(0.2);
+    const bc = rgbas(1);
+
+    let labels = [];
+    let selfVals = [];
+    let teamVals = [];
+    for (let i=0;i<data.length;i++) {
+        labels.push(data[i].key);
+        selfVals.push(data[i].data.self.avg);
+        teamVals.push(data[i].data.team.avg)
+    }
 
     new Chart(ctx, {
         type: 'radar',
         data: {
-            labels: ["Leadership", "Mentoring", "Skills", "Onemore"],
+            labels: labels,
             datasets: [
                 {
                     label: 'SELF',
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    data: [1, 2, 4, 3]
+                    backgroundColor: bgc[1],
+                    borderColor: bc[1],
+                    data: selfVals
                 },
                 {
                     label: 'TEAM',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    data: [4, 3, 5, 6]
+                    backgroundColor: bgc[2],
+                    borderColor: bc[2],
+                    data: teamVals
                 }
             ]
         },
         options: {
             legend: {
                 position: 'top',
-            },
-            title: {
-                display: true,
-                text: 'Self vs Team'
             },
             scale: {
                 ticks: {
@@ -557,7 +569,7 @@ function drawRadarGraph(index, data) {
         }
     });
 
-    document.getElementById('output').appendChild(canvas);
+    document.getElementById(index.toString()).appendChild(canvas);
 }
 
 // Helper functions end ---->
@@ -591,6 +603,7 @@ const downloadFile = function (index) {
     const exportData = aggregateData(index);
     const scoresByCategory = groupScoresByCategory(exportData);
     drawScatterGraph(index, scoresByCategory);
+    drawRadarGraph(index, scoresByCategory);
     drawBarGraphs(index, exportData);
     exportToCsv(iData[index][nameColumnNumber] + '.csv', exportData);
 };
