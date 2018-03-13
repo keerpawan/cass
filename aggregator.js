@@ -344,7 +344,8 @@ function getBarChartData(index, label, labels, data) {
             scales: {
                 yAxes: [{
                     ticks: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        max: 5
                     }
                 }]
             }
@@ -532,7 +533,7 @@ function drawRadarGraph(index, data) {
     let labels = [];
     let selfVals = [];
     let teamVals = [];
-    for (let i=0;i<data.length;i++) {
+    for (let i = 0; i < data.length; i++) {
         labels.push(data[i].key);
         selfVals.push(data[i].data.self.avg);
         teamVals.push(data[i].data.team.avg)
@@ -590,8 +591,10 @@ const openFile = function (event, type) {
             iData = rows;
         }
 
-        if (tData && iData && mData) {
-            tData = tData.concat(mData);
+        if (tData && iData) {
+            if (mData) {
+                tData = tData.concat(mData);
+            }
             showDownloadLinks();
         }
     };

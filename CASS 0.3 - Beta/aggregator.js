@@ -344,7 +344,8 @@ function getBarChartData(label, labels, data) {
             scales: {
                 yAxes: [{
                     ticks: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        max: 5
                     }
                 }]
             }
@@ -534,8 +535,10 @@ const openFile = function (event, type) {
             iData = rows;
         }
 
-        if (tData && iData && mData) {
-            tData = tData.concat(mData);
+        if (tData && iData) {
+            if (mData) {
+                tData = tData.concat(mData);
+            }
             showDownloadLinks();
         }
     };
