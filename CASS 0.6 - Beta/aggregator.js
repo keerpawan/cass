@@ -4,11 +4,11 @@ const removeColumnNumbers = [0, 1];
 const nameColumnNumber = 0;
 const headingRow = 0;
 const scoreMapper = {
-    "strongly agree": 5,
-    "slightly agree": 4,
-    "neutral": 3,
-    "slightly disagree": 2,
-    "strongly disagree": 1,
+    "5": 5,
+    "4": 4,
+    "3": 3,
+    "2": 2,
+    "1": 1,
     "na": null
 };
 const width = 400;
@@ -136,18 +136,16 @@ function aggregateData(index) {
     let tPerson = [];
     // extract person's info from team file
     for (let i = 0; i < tData.length; i++) {
-        // check if the names match
         if (tData[i][nameColumnNumber] === iPerson[nameColumnNumber]) {
-            // deep copy row
-            let temp = JSON.parse(JSON.stringify(tData[i]));
             // remove name column
+            let temp = JSON.parse(JSON.stringify(tData[i]));
             temp.splice(nameColumnNumber, 1);
             tPerson.push(temp);
         }
     }
 
-    // console.log(tPerson);
     // transpose array
+    // console.log(tPerson);
     let t = [];
     for (let i = 0; i < tPerson[0].length; i++) {
         let r = [];
