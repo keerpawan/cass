@@ -347,6 +347,7 @@ function getBarChartData(index, label, labels, data) {
                 yAxes: [{
                     ticks: {
                         beginAtZero: true,
+                        stepSize: 1,
                         max: 5
                     }
                 }]
@@ -504,12 +505,22 @@ function drawScatterGraph(index, data) {
                     scaleLabel: {
                         display: true,
                         labelString: 'SELF'
+                    },
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1,
+                        max: 5
                     }
                 }],
                 yAxes: [{
                     scaleLabel: {
                         display: true,
                         labelString: 'TEAM'
+                    },
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1,
+                        max: 5
                     }
                 }]
             }
@@ -566,7 +577,9 @@ function drawRadarGraph(index, data) {
             },
             scale: {
                 ticks: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    stepSize: 1,
+                    max: 5
                 }
             }
         }
@@ -607,7 +620,7 @@ const downloadFile = function (index) {
     console.log("Download file called with index: " + index);
     const exportData = aggregateData(index);
     const scoresByCategory = groupScoresByCategory(exportData);
-    drawScatterGraph(index, scoresByCategory);
+    // drawScatterGraph(index, scoresByCategory); // No longer needed
     drawRadarGraph(index, scoresByCategory);
     drawBarGraphs(index, exportData);
     exportToCsv(iData[index][nameColumnNumber] + '.csv', exportData);
