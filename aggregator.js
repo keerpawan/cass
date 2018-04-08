@@ -191,7 +191,7 @@ function aggregateData(index) {
             totalAnswersAll.push(totalAnswers);
             const avg = parseFloat((total / answered).toFixed(2));
             averageAll.push(avg);
-            discrepancyAll.push(Math.abs(parseFloat((iPerson[i + 1] - avg)).toFixed(2)));
+            discrepancyAll.push(parseFloat(parseFloat((iPerson[i + 1] - avg)).toFixed(2)));
             accuracyAll.push(parseFloat((answered / totalAnswers).toFixed(2)))
         } else {
             averageAll.push(t[i].clean("").join(" |----| "));
@@ -362,7 +362,7 @@ function sortColumn(n, m) {
             if (a[m] === b[m]) {
                 return 0;
             }
-            return (a[m] > b[m]) ? -1 : 1;
+            return (Math.abs(a[m]) > Math.abs(b[m])) ? -1 : 1;
         } else {
             return (a[n] < b[n]) ? -1 : 1;
         }
