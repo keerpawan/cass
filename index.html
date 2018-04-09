@@ -15,11 +15,12 @@
     </head>
     <body>
         <form>
+            <input type='button' onclick="refreshPage();" value="Start Over"><br><br>
             Individual : <input type='file' onchange='openFile(event, "INDI")'><br>
             Manager : <input type='file' onchange='openFile(event, "MANA")'><br>
             Team : <input type='file' onchange='openFile(event, "TEAM")'><br>
-            <input type='reset' onclick='reset()' ><br>
         </form>
+        <div id="acronyms"></div>
         <div id="output"></div>
     </body>
 </html>

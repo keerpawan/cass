@@ -22,6 +22,7 @@ const T = "TEAM";
 let iData;
 let mData;
 let tData;
+let acronyms = {};
 // globals end
 
 // Helper functions start ---->
@@ -103,6 +104,40 @@ function scrubData(rows) {
     return rows;
 }
 
+function showAcronymMapper() {
+    document.getElementById('acronyms').innerHTML = "<br/><br/>Please fill the acronyms<br/>";
+    const form = document.createElement("form");
+    for (let i = 0; i < iData[0].length; i++) {
+        if (iData[0][i].indexOf(')') !== -1) {
+            const key = iData[0][i].split(" ")[0].toUpperCase();
+            if (!acronyms.hasOwnProperty(key)) {
+                acronyms[key] = "";
+                const label = document.createElement("span");
+                label.innerHTML = "<br/>" + key;
+                const input = document.createElement("input");
+                input.setAttribute("type", "text");
+                input.setAttribute("id", key);
+                form.appendChild(label);
+                form.appendChild(input);
+            }
+        }
+    }
+    document.getElementById('acronyms').appendChild(form);
+}
+
+function fillAcronymMapper() {
+    for (let key in acronyms) {
+        if (acronyms.hasOwnProperty(key)) {
+            const value = document.getElementById(key).value;
+            if (value) {
+                acronyms[key] = value;
+            } else {
+                acronyms[key] = "";
+            }
+        }
+    }
+}
+
 function showDownloadLinks() {
     console.log("Preparing links");
 
@@ -110,14 +145,14 @@ function showDownloadLinks() {
     document.getElementById('output').innerHTML = "<br/><br/>Ready to export<br/>";
 
     for (let i = 1; i < iData.length; i++) {
-        let contentRow = document.createElement("div");
+        const contentRow = document.createElement("div");
         contentRow.setAttribute("id", i.toString());
         contentRow.classList.add("contentRow");
         document.getElementById("output").appendChild(document.createElement("br"));
         document.getElementById("output").appendChild(contentRow);
         document.getElementById("output").appendChild(document.createElement("br"));
 
-        let link = document.createElement("a");
+        const link = document.createElement("a");
         link.innerText = iData[i][nameColumnNumber];
         link.setAttribute("href", "#");
         link.setAttribute("onclick", "downloadFile(" + i + ")");
@@ -483,8 +518,9 @@ function drawScatterGraph(index, data) {
 
     let datasets = [];
     for (let i = 0; i < data.length; i++) {
+        const key = acronyms.hasOwnProperty(data[i].key) && acronyms[data[i].key] !== "" ? acronyms[data[i].key] : data[i].key;
         datasets.push({
-            label: data[i].key,
+            label: key,
             backgroundColor: colors[i],
             borderColor: colors[i],
             radius: [0, 0, 10],
@@ -547,7 +583,8 @@ function drawRadarGraph(index, data) {
     let selfVals = [];
     let teamVals = [];
     for (let i = 0; i < data.length; i++) {
-        labels.push(data[i].key);
+        const key = acronyms.hasOwnProperty(data[i].key) && acronyms[data[i].key] !== "" ? acronyms[data[i].key] : data[i].key;
+        labels.push(key);
         selfVals.push(data[i].data.self.avg);
         teamVals.push(data[i].data.team.avg)
     }
@@ -610,6 +647,7 @@ const openFile = function (event, type) {
             if (mData) {
                 tData = tData.concat(mData);
             }
+            showAcronymMapper();
             showDownloadLinks();
         }
     };
@@ -620,14 +658,14 @@ const downloadFile = function (index) {
     console.log("Download file called with index: " + index);
     const exportData = aggregateData(index);
     const scoresByCategory = groupScoresByCategory(exportData);
+    fillAcronymMapper();
     // drawScatterGraph(index, scoresByCategory); // No longer needed
     drawRadarGraph(index, scoresByCategory);
     drawBarGraphs(index, exportData);
     exportToCsv(iData[index][nameColumnNumber] + '.csv', exportData);
 };
 
-const reset = function () {
-    iData = undefined;
-    mData = undefined;
-    tData = undefined;
+const refreshPage = function() {
+    console.log("Res");
+    location.reload();
 };
